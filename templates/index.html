@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#151515">
+  <title>RetroFix — Photo Restoration</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=9">
+  <script src="{{ url_for('static', filename='app.js') }}?v=9" defer></script>
+</head>
+<body data-theme="dark">
+  <main class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="RetroFix home">RETRO<span>/</span>FIX</a>
+      <div class="header-actions"><span class="course-tag">BCI515D · IMAGE & VIDEO PROCESSING</span><button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="true">◐ <span>Light mode</span></button></div>
+    </header>
+    <section class="intro"><p class="eyebrow">A photo restoration workbench</p><h1>Bring old photographs<br>back into focus.</h1><p class="intro-copy">A simple, local toolkit for faded and damaged photographs. Restore them one step at a time with classical image processing.</p></section>
+    <nav class="steps" aria-label="Restoration workflow"><div class="step active"><span>01</span> Upload photo</div><div class="step"><span>02</span> Reduce noise</div><div class="step"><span>03</span> Repair damage</div><div class="step"><span>04</span> Enhance & save</div></nav>
+    <section class="workspace" aria-labelledby="upload-title">
+      <div class="section-heading"><div><p class="eyebrow">Start here</p><h2 id="upload-title">Choose a photograph</h2></div><span class="format-note">JPG · JPEG · PNG</span></div>
+      <label class="dropzone" id="dropzone" for="photo-input"><input id="photo-input" type="file" accept="image/jpeg,image/png"><span class="upload-icon" aria-hidden="true">↑</span><span class="drop-title">Drop a photo here or <span class="browse-link">browse files</span></span><span class="drop-hint">JPG, JPEG, or PNG · up to 15 MB</span></label>
+      <div class="preview" id="preview" hidden>
+        <div class="preview-topline"><div><p class="eyebrow">Selected image</p><h2 id="file-name">Photo preview</h2></div><button class="text-button" id="remove-photo" type="button">Remove photo</button></div>
+        <div class="preview-frame"><img id="photo-preview" alt="Selected photograph preview"></div>
+        <p class="image-meta" id="image-meta"></p>
+        <div class="action-row"><button class="primary-button" id="process-photo" type="button">Prepare image <span aria-hidden="true">→</span></button><span class="action-hint">Preprocessing runs locally through Python and OpenCV.</span></div>
+        <p class="status-message" id="status-message" role="status" aria-live="polite" hidden></p>
+        <section class="results" id="results" hidden aria-labelledby="results-title">
+          <div class="results-heading"><div><p class="eyebrow">Python preprocessing</p><h2 id="results-title">Before and after</h2></div><span class="format-note" id="processed-dimensions"></span></div>
+          <div class="result-grid"><figure><figcaption>Original</figcaption><img id="server-original" alt="Original photograph received by Python"></figure><figure><figcaption>Preprocessed preview</figcaption><img id="server-preprocessed" alt="Preprocessed photograph returned by OpenCV"></figure></div>
+          <div class="explanation-card"><span class="note-mark">i</span><div><strong>What happened?</strong><p id="processing-explanation"></p></div></div>
+        </section>
+        <section class="restoration-controls" id="restoration-controls" hidden aria-labelledby="controls-title">
+          <div class="results-heading"><div><p class="eyebrow">Traditional restoration</p><h2 id="controls-title">Tune the restoration</h2></div><span class="format-note">Choose any combination</span></div>
+          <div class="control-grid">
+            <article class="control-card"><label class="check-row"><input id="use-median" type="checkbox" checked><span><strong>Median noise removal</strong><small>Reduces speckle noise while preserving edges.</small></span></label><label class="setting-label" for="median-kernel">Filter window</label><select id="median-kernel"><option value="3" selected>3 × 3 — gentle</option><option value="5">5 × 5 — stronger</option><option value="7">7 × 7 — strongest</option></select></article>
+            <article class="control-card"><label class="check-row"><input id="use-clahe" type="checkbox" checked><span><strong>CLAHE contrast</strong><small>Improves local contrast in the brightness channel.</small></span></label><label class="setting-label" for="clip-limit">Contrast strength <output id="clip-value">2.0</output></label><input id="clip-limit" type="range" min="1" max="4" step="0.5" value="2"></article>
+            <article class="control-card"><label class="check-row"><input id="use-sharpen" type="checkbox" checked><span><strong>Unsharp mask</strong><small>Adds crispness by blending a blurred copy.</small></span></label><label class="setting-label" for="sharpen-amount">Sharpness <output id="sharp-value">0.8</output></label><input id="sharpen-amount" type="range" min="0.3" max="2" step="0.1" value="0.8"></article>
+          </div>
+          <section class="damage-editor" aria-labelledby="damage-title">
+            <div class="results-heading"><div><p class="eyebrow">Module 5 · Blotch and scratch removal</p><h2 id="damage-title">Mark damaged areas</h2></div><span class="format-note">Brush marks appear in magenta</span></div>
+            <p class="damage-help">Paint over white damaged spots, scratches, and paper wrinkles or fold creases. Cover each full defect with a little overlap so it is inside the magenta mask. For long wrinkles, use several short strokes. Inpainting fills marked areas from nearby pixels.</p>
+            <div class="paint-frame"><div class="paint-surface"><img id="damage-background" alt="Photo under the scratch marking layer"><canvas id="damage-canvas" aria-label="Brush canvas for marking scratches"></canvas></div></div>
+            <div class="brush-toolbar"><label class="brush-setting" for="brush-size">Brush size <output id="brush-value">24 px</output><input id="brush-size" type="range" min="4" max="90" step="1" value="24"></label><label class="brush-setting" for="inpaint-radius">Inpainting radius <output id="radius-value">6 px</output><input id="inpaint-radius" type="range" min="1" max="20" step="1" value="6"></label><button class="secondary-button" id="clear-mask" type="button">Clear marks</button></div>
+          </section>
+          <button class="primary-button" id="restore-photo" type="button">Restore marked photo <span aria-hidden="true">→</span></button>
+          <p class="status-message" id="restore-status" role="status" aria-live="polite" hidden></p>
+          <div class="restore-results" id="restore-results" hidden>
+            <div class="results-heading"><div><p class="eyebrow">Restoration result</p><h2>Compare the result</h2></div><span class="format-note" id="restore-dimensions"></span></div>
+            <div class="result-grid"><figure><figcaption>Before</figcaption><img id="restore-original" alt="Image before restoration"></figure><figure><figcaption>After</figcaption><img id="restore-output" alt="Image after selected restoration methods"></figure></div>
+            <div class="explanation-card"><span class="note-mark">i</span><div><strong>Methods applied</strong><p id="restore-explanation"></p></div></div>
+            <a class="download-button" id="download-restored" download="retrofix-restored.jpg">Download restored image <span aria-hidden="true">↓</span></a>
+          </div>
+        </section>
+      </div>
+      <div class="empty-note" id="empty-note"><span class="note-mark">i</span><span>Select a photograph, prepare it, then tune the controls and mark scratches before restoring.</span></div>
+    </section>
+    <footer>RETRO/FIX <span>·</span> Traditional digital image processing <span>·</span> No machine learning</footer>
+  </main>
+</body>
+</html>
+
+
+
+
+
+
