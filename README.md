@@ -57,3 +57,11 @@ The repair is manual: only marked regions are inpainted. Small, narrow damaged r
 - [Viva questions and answers](docs/VIVA_QA.md)
 - [Manual testing guide](docs/TESTING_GUIDE.md)
 - [Sample image sources](sample_images/README.md)
+
+
+## Academic deliverables
+
+- `docs/RetroFix_Project_Report.docx` - editable mini-project report styled after the supplied reference.
+- `docs/RetroFix_Presentation.pptx` - 11-slide presentation in a pale beige and white theme.
+
+Fill in the student, USN, guide, department, and college fields before submission.
